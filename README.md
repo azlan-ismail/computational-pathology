@@ -30,7 +30,7 @@ Each later notebook takes the outputs of the earlier ones as Kaggle "Notebook ou
 
 Trained checkpoints, per-patch test predictions and the full `results.json` files are stored as outputs of the
 Kaggle notebook versions; they are too large for a Git repository. `results/` contains the summary numbers used
-in the manuscript, transcribed from the run logs. The Stage 5 numbers come from an interactive Kaggle session.
+in the manuscript, transcribed from the run logs. The Stage 5 outputs are saved in Version 3 of its notebook, from an interactive run.
 
 ## Tests
 
