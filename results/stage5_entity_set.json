@@ -1,0 +1,10 @@
+{"source": "Kaggle notebook9c36bfc9da, interactive session, 2026-11-24, full data, 2000 bootstrap replicates",
+ "N128": {"feat": "pca128", "graph": "none", "pool": "none", "seeds": [0,1,2,3,4],
+  "test_accuracy": {"mean": 0.81102, "sd": 0.010572}, "test_auc": {"mean": 0.89094, "sd": 0.0094655},
+  "test_ece": {"mean": 0.074527, "sd": 0.018177}, "val_accuracy": {"mean": 0.85864, "sd": 0.0039368},
+  "best_epoch_mean": 1.4, "epochs_run_mean": 3.4},
+ "comparisons": [
+  {"reference": "M8", "accuracy": {"diff": -0.003909, "lo": -0.01456, "hi": 0.006997, "p": 0.496, "p_holm": 1}, "auc": {"diff": 0.008352, "lo": -0.006415, "hi": 0.02434, "p": 0.299, "p_holm": 0.897}},
+  {"reference": "B_noedges", "accuracy": {"diff": -0.002667, "lo": -0.01312, "hi": 0.008502, "p": 0.618, "p_holm": 1}, "auc": {"diff": 0.001025, "lo": -0.007847, "hi": 0.01006, "p": 0.84, "p_holm": 1}},
+  {"reference": "M1", "accuracy": {"diff": -0.000442, "lo": -0.0103, "hi": 0.01012, "p": 0.923, "p_holm": 1}, "auc": {"diff": 0.001128, "lo": -0.008354, "hi": 0.01118, "p": 0.816, "p_holm": 1}}],
+ "resources": {"train_epoch_seconds": 9.24, "train_epoch_seconds_sd": 0.1896, "peak_gpu_mb_train": 47.42, "inference_ms_per_graph": 0.01351, "parameters": 26850, "reps": 3, "gpu": "Tesla T4"}}
