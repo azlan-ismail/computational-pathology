@@ -1,7 +1,7 @@
-# Graph-contribution audit for a hybrid CNN-GNN on PatchCamelyon
+# Graph-contribution assessment protocol for a hybrid CNN-GNN on PatchCamelyon
 
 Code, notebooks and result summaries for
-"Does the graph matter? A graph-contribution audit for hybrid CNN-GNN models, applied to reduction
+"Does the graph matter? A graph-contribution assessment protocol for hybrid CNN-GNN models, applied to reduction
 trade-offs in histopathology patch classification".
 
 ## Contents
