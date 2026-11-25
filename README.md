@@ -1,8 +1,7 @@
 # Graph-contribution assessment protocol for a hybrid CNN-GNN on PatchCamelyon
 
 Code, notebooks and result summaries for
-"Does the graph matter? A graph-contribution assessment protocol for hybrid CNN-GNN models, applied to reduction
-trade-offs in histopathology patch classification".
+"Does the graph matter? A graph-contribution assessment protocol for hybrid CNN-GNN models in histopathology".
 
 ## Contents
 
