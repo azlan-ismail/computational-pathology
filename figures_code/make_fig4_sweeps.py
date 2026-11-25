@@ -1,11 +1,22 @@
-"""Fig. 3: reduction-strength sweeps (accuracy and training time per mechanism)."""
+"""Fig. 4: reduction-strength sweeps (accuracy and training time per mechanism). Usage: python -I make_fig4_sweeps.py"""
 import os, sys
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-HERE = os.path.dirname(os.path.abspath(__file__)); sys.path.insert(0, HERE)
-from make_figs import BLUE, ORANGE, INK, MUTED, OUTDIR   # shared style
-from stage4_data import RUNS
+HERE = os.path.dirname(os.path.abspath(__file__))
+ROOT = os.path.dirname(HERE)
+RESULTS = os.path.join(ROOT, "results")
+OUTDIR = os.path.join(ROOT, "figures")
+sys.path.insert(0, RESULTS)
+from stage4_data import RUNS  # noqa: E402
+
+BLUE, ORANGE, INK, MUTED, GRID = "#2a78d6", "#eb6834", "#1f1f1e", "#6b6a63", "#e4e3de"
+plt.rcParams.update({
+    "font.family": "DejaVu Sans", "font.size": 8, "axes.edgecolor": MUTED, "axes.labelcolor": INK,
+    "xtick.color": MUTED, "ytick.color": MUTED, "axes.spines.top": False, "axes.spines.right": False,
+    "axes.grid": True, "grid.color": GRID, "grid.linewidth": 0.6, "axes.axisbelow": True,
+    "legend.frameon": False, "savefig.dpi": 300,
+})
 
 panels = [
     ("PCA dimensions", [("F32", 32), ("F64", 64), ("M1", 128), ("F256", 256), ("M8", 576)],
@@ -42,5 +53,5 @@ for c, (title, pts, default, ticks) in enumerate(panels):
 axes[0, 0].set_ylim(76, 85)
 fig.tight_layout()
 for ext in ("pdf", "png"):
-    fig.savefig(os.path.join(OUTDIR, f"fig3_sweeps.{ext}"))
-print("fig3 written")
+    fig.savefig(os.path.join(OUTDIR, f"fig4_sweeps.{ext}"))
+print("fig4 written")

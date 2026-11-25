@@ -7,11 +7,11 @@ Code, notebooks and result summaries for
 
 | Folder | What it holds |
 |---|---|
-| `notebooks/` | The six Kaggle notebooks, in run order (GPU T4 x2, Internet on) |
+| `notebooks/` | The Kaggle notebooks, in run order (GPU T4 x2, Internet on) |
 | `scripts/` | The same code as plain Python scripts (`# %%` cells) and the templates they were built from |
 | `tests/` | Local tests for each stage and the script-to-notebook build tools |
-| `results/` | Result summaries transcribed from the Kaggle run logs |
-| `figures_code/` | Scripts that draw Figures 2-4 from `results/` |
+| `results/` | Result summaries from the Kaggle runs, including the Stage 3b fidelity summary and the Stage 7 example patches |
+| `figures_code/` | Scripts that draw Figures 1-6 from `results/` |
 | `figures/` | The figures those scripts produce |
 
 ## Pipeline
@@ -27,8 +27,8 @@ Code, notebooks and result summaries for
 5. `stage5_entityset_pcam` - the entity-set model (PCA-128 node features, no edges).
 6. `stage6_gat_pcam` - the protocol repeated with a graph attention network (GAT): tuning, A8 and A-none with five seeds,
    PGExplainer fidelity against random edges.
-7. `stage7_figure_pcam` - qualitative example: PGExplainer edges and random edges for M8 and M3 (seed 0) on one
-   representative tumour and one normal test patch (data for the explanation figure).
+7. `stage7_figure_pcam` - qualitative example: PGExplainer, gradient-saliency and random edges for M8 and M3 (seed 0)
+   on one representative tumor and one normal test patch (data for Figures 1 and 6).
 
 Each later notebook takes the outputs of the earlier ones as Kaggle "Notebook output" inputs.
 
@@ -37,6 +37,17 @@ Each later notebook takes the outputs of the earlier ones as Kaggle "Notebook ou
 Trained checkpoints, per-patch test predictions and the full `results.json` files are stored as outputs of the
 Kaggle notebook versions; they are too large for a Git repository. `results/` contains the summary numbers used
 in the manuscript, transcribed from the run logs. The Stage 5 outputs are saved in Version 3 of its notebook, from an interactive run.
+
+## Figures
+
+Each script reads `results/` and writes a PDF and a PNG to `figures/`:
+
+    python -I figures_code/make_fig1.py               # pipeline (Stage 7 example patch)
+    cd figures_code && pdflatex -output-directory ../figures fig2_protocol.tex   # protocol
+    python -I figures_code/make_fig3_cost.py           # accuracy against cost
+    python -I figures_code/make_fig4_sweeps.py         # reduction strength
+    python -I figures_code/make_fig5_fidelity.py       # random-referenced fidelity (Stage 3b)
+    python -I figures_code/make_fig6_qualitative.py    # qualitative explanations (Stage 7)
 
 ## Tests
 
