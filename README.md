@@ -20,6 +20,9 @@ Code, notebooks and result summaries for
    MobileNetV3-Small and stores the entity graphs (8-bit node features, Delaunay edges).
 2. `stage2_train_pcam` - hyperparameter tuning, then M1-M8 and three baselines with five seeds; resource benchmarks.
 3. `stage3_fidelity_pcam` - PGExplainer fidelity against random edges on 1,000 test graphs.
+   `stage3b_fidelity_fixed_pcam` - corrected fidelity: random tie-breaking of explanation edges, a check for
+   collapsed (all-tied) explainer scores, gradient saliency as a second explainer, M1-M8 and the GAT model A8.
+   Stage 3 broke ties by edge index; its PGExplainer results are superseded by Stage 3b.
 4. `stage4_sweeps_stats_pcam` - reduction-strength sweeps, hierarchical bootstrap, Holm adjustment.
 5. `stage5_entityset_pcam` - the entity-set model (PCA-128 node features, no edges).
 6. `stage6_gat_pcam` - the protocol repeated with a graph attention network (GAT): tuning, A8 and A-none with five seeds,

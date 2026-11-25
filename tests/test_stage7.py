@@ -34,7 +34,7 @@ def fake_run_child(fn, *a):
         pf = float(r.uniform(0.3, 1))
         rows[int(g)] = {"scores": r.random(ne).tolist(), "random": r.random(ne).tolist(), "p_full": pf,
                         "p_drop_pgx": pf - float(r.uniform(0, .2)), "p_drop_rand": pf - float(r.uniform(0, .02)),
-                        "p_keep_pgx": pf, "p_keep_rand": pf}
+                        "p_keep_pgx": pf, "p_keep_rand": pf, "p_drop_pgx_tb": pf, "p_keep_pgx_tb": pf, "n_unique": 1, "s_min": 0.0, "s_max": 0.0, "frac_at_max": 1.0, "top_is_index_order": True, "p_drop_sal": pf - 0.05, "p_keep_sal": pf, "sal_scores": r.random(ne).tolist(), "sal_n_unique": ne, "kept_pgx_tb": list(range(ne//2)), "kept_sal": list(range(0, ne, 2)), "kept_rand": list(range(1, ne, 2))}
     json.dump({"run_id": job.run_id, "checkpoint_max_abs_prob_diff": 0.0, "rows": rows}, open(path, "w"))
 s7.run_child = fake_run_child
 s7.main()

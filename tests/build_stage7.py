@@ -22,9 +22,10 @@ header = '''# %% [markdown]
 # For seed 0 of M8 (no reduction) and M3 (Top-K pooling) it repeats the Stage 3 procedure exactly:
 # same standardisation, same 500 validation graphs to fit PGExplainer, same 1,000 test graphs, same
 # random reference. It then picks, among the explained test graphs that both models classify
-# correctly, the tumour patch and the normal patch whose M3 PGExplainer-minus-random drop at 50 % of
+# correctly, the tumour patch and the normal patch whose M3 saliency-minus-random drop at 50 % of
 # edges is closest to the median (a representative example, not the best one), and saves the patch
-# image, entity centroids, Delaunay edges, edge scores and the predicted probabilities to
+# image, entity centroids, Delaunay edges, edge scores (PGExplainer with random tie-breaking and gradient
+# saliency), tie diagnostics and the predicted probabilities to
 # `stage7_results/stage7_figure_data.json`. Run time: about 15 minutes.
 
 # %%
@@ -99,6 +100,21 @@ def fetch_test_images():
     raise RuntimeError(f"Could not download {TEST_X}: {last}")
 
 
+def saliency_scores(model, x, ei, bvec, target):
+    """|d logit_true / d m_e| with every edge mask m_e = 1 (one backward pass)."""
+    from torch_geometric.explain.algorithm.utils import clear_masks, set_masks
+    mask = torch.ones(ei.shape[1], device=x.device, requires_grad=True)
+    set_masks(model, mask, ei, apply_sigmoid=False)
+    try:
+        with torch.enable_grad():
+            out = model(x, ei, bvec, 1)
+            out[0, int(target)].backward()
+        g = mask.grad.detach().abs().float().cpu().numpy()
+    finally:
+        clear_masks(model)
+    return g
+
+
 def figure_child(job, data, norm_args, fit_ids, test_ids, ckpt_dir, out_path):
     """Stage 3 explain_run, keeping the per-graph edge scores and probabilities at KEEP."""
     from torch_geometric.explain import Explainer, PGExplainer
@@ -127,6 +143,7 @@ def figure_child(job, data, norm_args, fit_ids, test_ids, ckpt_dir, out_path):
             explainer.algorithm.train(ep, model, x, ei, target=y, b=bvec, B=1)
 
     rng = np.random.default_rng(10_000 + job.seed)        # same random stream as Stage 3
+    tie_rng = np.random.default_rng(20_000 + job.seed)    # separate stream for tie-breaking
     rows = {}
     for g in test_ids:
         xb, eib, bb, yb = make_batch(d_te, np.array([g]), job.graph)
@@ -134,22 +151,41 @@ def figure_child(job, data, norm_args, fit_ids, test_ids, ckpt_dir, out_path):
         scores = explainer(x, ei, target=y, b=bvec, B=1).edge_mask.detach().float().cpu().numpy()
         us = undirected_scores(scores, True)
         rand = rng.random(len(us))
+        tb = tie_rng.random(len(us))
+        k_n = min(len(us), max(1, int(round(KEEP * len(us)))))
+        order_tb = np.lexsort((tb, -us))[:k_n]                 # ties broken at random
+        keep_tb = units_to_edges(np.sort(order_tb), len(us), True)
+        top_idx = top_units(us, KEEP)
         keeps = []
         for method_scores in (us, rand):
             for s in SPARSITY:
                 k = units_to_edges(top_units(method_scores, s), len(us), True)
                 keeps += [k, ~k]
+        sal = undirected_scores(saliency_scores(model, x, ei, bvec, int(yb[0])).astype(np.float64), True)
+        tb2 = tie_rng.random(len(us))
+        keep_sal = units_to_edges(np.sort(np.lexsort((tb2, -sal))[:k_n]), len(us), True)
+        keeps += [keep_tb, ~keep_tb, keep_sal, ~keep_sal]
         X, EI, BV = variant_batch(xb, eib, keeps)
         xt, eit, bt, _ = to_dev((X, EI, BV, yb), kind, norm, dev)
         with torch.no_grad():
             p = torch.softmax(model(xt, eit, bt, len(keeps) + 1), 1)[:, int(yb[0])].float().cpu().numpy()
-        cols = variant_layout()
+        cols = variant_layout() + ["pgx_tiebreak_keep", "pgx_tiebreak_drop", "sal_keep", "sal_drop"]
         rows[int(g)] = {"scores": us.tolist(), "random": rand.tolist(),
                         "p_full": float(p[0]),
                         "p_drop_pgx": float(p[cols.index(f"pgexplainer_drop{KEEP}")]),
                         "p_drop_rand": float(p[cols.index(f"random_drop{KEEP}")]),
                         "p_keep_pgx": float(p[cols.index(f"pgexplainer_keep{KEEP}")]),
-                        "p_keep_rand": float(p[cols.index(f"random_keep{KEEP}")])}
+                        "p_keep_rand": float(p[cols.index(f"random_keep{KEEP}")]),
+                        "p_drop_pgx_tb": float(p[cols.index("pgx_tiebreak_drop")]),
+                        "p_keep_pgx_tb": float(p[cols.index("pgx_tiebreak_keep")]),
+                        "p_drop_sal": float(p[cols.index("sal_drop")]), "p_keep_sal": float(p[cols.index("sal_keep")]),
+                        "sal_scores": sal.tolist(), "sal_n_unique": int(len(np.unique(sal))),
+                        "kept_pgx_tb": np.flatnonzero(keep_tb[:len(us)]).tolist(),
+                        "kept_sal": np.flatnonzero(keep_sal[:len(us)]).tolist(),
+                        "kept_rand": top_units(rand, KEEP).tolist(),
+                        "n_unique": int(len(np.unique(us))), "s_min": float(us.min()), "s_max": float(us.max()),
+                        "frac_at_max": float(np.mean(us == us.max())),
+                        "top_is_index_order": bool(np.array_equal(top_idx, np.arange(len(top_idx))))}
     with open(out_path, "w") as f:
         json.dump({"run_id": job.run_id, "checkpoint_max_abs_prob_diff": diff, "rows": rows}, f)
 
@@ -189,7 +225,25 @@ def main():
         r = res[name]["rows"].values()
         summary[name] = {"fid_plus_pgx": float(np.mean([x["p_full"] - x["p_drop_pgx"] for x in r])),
                          "fid_plus_rand": float(np.mean([x["p_full"] - x["p_drop_rand"] for x in r]))}
+    for name in CONFIGS:
+        r = list(res[name]["rows"].values())
+        summary[name].update({
+            "fid_plus_pgx_tiebreak": float(np.mean([x["p_full"] - x["p_drop_pgx_tb"] for x in r])),
+            "fid_minus_pgx": float(np.mean([x["p_full"] - x["p_keep_pgx"] for x in r])),
+            "fid_minus_rand": float(np.mean([x["p_full"] - x["p_keep_rand"] for x in r])),
+            "fid_minus_pgx_tiebreak": float(np.mean([x["p_full"] - x["p_keep_pgx_tb"] for x in r])),
+            "fid_plus_sal": float(np.mean([x["p_full"] - x["p_drop_sal"] for x in r])),
+            "fid_minus_sal": float(np.mean([x["p_full"] - x["p_keep_sal"] for x in r])),
+            "graphs_sal_all_tied": int(sum(x["sal_n_unique"] == 1 for x in r)),
+            "graphs_all_scores_tied": int(sum(x["n_unique"] == 1 for x in r)),
+            "graphs_top_is_index_order": int(sum(x["top_is_index_order"] for x in r)),
+            "median_unique_scores": float(np.median([x["n_unique"] for x in r])),
+            "median_frac_at_max": float(np.median([x["frac_at_max"] for x in r])),
+            "score_min": float(min(x["s_min"] for x in r)), "score_max": float(max(x["s_max"] for x in r)),
+            "graphs": len(r)})
     log(f"seed-0 Fid+ at {KEEP:.0%} kept: {summary}")
+    with open(os.path.join(OUT, "stage7_diagnostics.json"), "w") as f:
+        json.dump(summary, f, indent=2)
 
     # representative examples: correct for both models, M3 (PGX - random) drop closest to the median
     d_te = ev["test"]
@@ -197,7 +251,7 @@ def main():
     for c in (1, 0):
         cand = [int(g) for g in test_ids if d_te.y[g] == c
                 and all(res[n]["rows"][str(int(g))]["p_full"] > 0.5 for n in CONFIGS)]
-        gap = np.array([(lambda x: (x["p_full"] - x["p_drop_pgx"]) - (x["p_full"] - x["p_drop_rand"]))(
+        gap = np.array([(lambda x: (x["p_full"] - x["p_drop_sal"]) - (x["p_full"] - x["p_drop_rand"]))(
             res["M3"]["rows"][str(g)]) for g in cand])
         chosen["tumour" if c == 1 else "normal"] = cand[int(np.argmin(np.abs(gap - np.median(gap))))]
     log(f"chosen test graphs: {chosen}")
@@ -215,8 +269,7 @@ def main():
                 "image_png_b64": base64.b64encode(buf.getvalue()).decode(),
                 "centroids": fg["centroids"][a:b].tolist(),
                 "edges": fg["delaunay_edges"][ea:eb].tolist(),
-                "models": {n: {k: (np.round(v, 5).tolist() if isinstance(v, list) else round(v, 5))
-                               for k, v in res[n]["rows"][str(g)].items()} for n in CONFIGS}}
+                "models": {n: res[n]["rows"][str(g)] for n in CONFIGS}}
     with open(os.path.join(OUT, "stage7_figure_data.json"), "w") as f:
         json.dump(out, f)
 
@@ -232,14 +285,13 @@ def main():
         col = 1
         for n in CONFIGS:
             m = ex["models"][n]
-            for method, key in (("PGExplainer", "scores"), ("random", "random")):
+            for method, key in (("saliency", "kept_sal"), ("random", "kept_rand")):
                 ax = axes[r, col]; col += 1
                 ax.imshow(img, alpha=0.5)
-                k = top_units(np.array(m[key]), KEEP)
-                keep = np.zeros(len(e), bool); keep[k] = True
+                keep = np.zeros(len(e), bool); keep[m[key]] = True
                 for (i, j), on in zip(e, keep):
                     ax.plot(c[[i, j], 1], c[[i, j], 0], color="crimson" if on else "0.6", lw=1.4 if on else 0.5)
-                drop = m["p_full"] - (m["p_drop_pgx"] if key == "scores" else m["p_drop_rand"])
+                drop = m["p_full"] - (m["p_drop_sal"] if key == "kept_sal" else m["p_drop_rand"])
                 ax.set_title(f"{n} {method}: drop {drop:.3f}", fontsize=9)
         for ax in axes[r]:
             ax.axis("off")
