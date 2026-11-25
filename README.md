@@ -52,3 +52,8 @@ Each script reads `results/` and writes a PDF and a PNG to `figures/`:
 ## Tests
 
     python -I tests/test_stage4.py scripts
+
+## Licence
+
+The code is released under the MIT License (see `LICENSE`). The two example patches in
+`results/stage7_figure/` are PatchCamelyon test images, which the PCam authors release under CC0.

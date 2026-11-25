@@ -1,10 +1,10 @@
 # Numbers transcribed from the Kaggle logs (Stage 2 version 3 and Stage 3 version 1), used until
 # Stage 4 results.json (with bootstrap CIs) is available.
 STAGE2 = {  # name: (acc mean %, acc sd, auc mean, auc sd, ece, epochs run)
- "B_noedges": (81.37, 0.98, 0.8899, 0.0065, 0.0734, 3.7),
+ "B_noedges": (81.37, 0.98, 0.8899, 0.00645, 0.0734, 3.7),
  "B_patch_linear": (78.23, 0.47, 0.8705, 0.0046, 0.0198, 20.0),
  "B_patch_mlp": (78.57, 0.92, 0.8827, 0.0063, 0.0463, 10.0),
- "M1": (81.16, 0.74, 0.8898, 0.0075, 0.0759, 2.7),
+ "M1": (81.16, 0.74, 0.8898, 0.00746, 0.0759, 2.7),
  "M2": (80.95, 0.70, 0.8867, 0.0119, 0.0770, 3.5),
  "M3": (80.24, 1.78, 0.8761, 0.0199, 0.0667, 3.4),
  "M4": (80.93, 1.48, 0.8866, 0.0130, 0.0769, 2.9),
