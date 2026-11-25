@@ -1,0 +1,21 @@
+{"source": "Kaggle notebook78a1b00a77, Version 1 (committed run), 2026-11-25, full data, 2000 bootstrap replicates",
+ "architecture": "GATConv x2 (4 heads x 16 = 64), mean readout, 64-32-2 head; otherwise as Stage 2",
+ "tuned_on_validation": {"lr": 0.001, "weight_decay": 0.001, "dropout": 0.0},
+ "A8": {"graph": "delaunay", "test_accuracy": {"mean": 0.81709, "sd": 0.0084034}, "test_auc": {"mean": 0.88629, "sd": 0.012393}, "test_ece": {"mean": 0.074359, "sd": 0.016691}, "best_epoch_mean": 0.85, "epochs_run_mean": 2.85},
+ "A_noedges": {"graph": "none", "test_accuracy": {"mean": 0.81932, "sd": 0.012087}, "test_auc": {"mean": 0.88912, "sd": 0.0097661}, "test_ece": {"mean": 0.064496, "sd": 0.016428}, "best_epoch_mean": 1.5, "epochs_run_mean": 3.5},
+ "comparisons_accuracy": [
+  {"config": "A8", "reference": "A_noedges", "diff": -0.0021117, "lo": -0.013953, "hi": 0.0092549, "p_holm": 1},
+  {"config": "A8", "reference": "M8", "diff": 0.0019786, "lo": -0.0077821, "hi": 0.011445, "p_holm": 1},
+  {"config": "A_noedges", "reference": "M8", "diff": 0.0040903, "lo": -0.0080104, "hi": 0.016022, "p_holm": 1},
+  {"config": "A8", "reference": "B_noedges", "diff": 0.0033894, "lo": -0.0065981, "hi": 0.013636, "p_holm": 1},
+  {"config": "A_noedges", "reference": "B_noedges", "diff": 0.0055011, "lo": -0.0067937, "hi": 0.018172, "p_holm": 1}],
+ "comparisons_auc": [{"config": "A8", "reference": "A_noedges", "diff": -0.0025648, "lo": -0.015314, "hi": 0.0088362, "p_holm": 1}],
+ "resources": {"A8": {"train_epoch_seconds": 22.518, "peak_gpu_mb_train": 174.69, "inference_ms_per_graph": 0.059715, "parameters": 43490, "directed_edges_per_graph": 494.43},
+               "A_noedges": {"train_epoch_seconds": 18.837, "peak_gpu_mb_train": 107.2, "inference_ms_per_graph": 0.035941, "parameters": 43490, "directed_edges_per_graph": 0}},
+ "fidelity_A8": {"seeds": [0,1,2], "graphs": 1000, "checkpoint_max_abs_prob_diff": 2.3842e-7,
+  "by_keep_fraction": {
+   "0.1": {"pgx_fid_plus": -0.00078081, "pgx_fid_minus": 0.032262, "random_fid_plus": -0.000040158, "random_fid_minus": 0.029449, "d_fid_plus": [-0.00074066, -0.0019837, 0.00048615], "d_fid_minus": [0.002813, 0.0012882, 0.0042691]},
+   "0.2": {"pgx_fid_plus": 0.00011194, "pgx_fid_minus": 0.02842, "random_fid_plus": 0.0011007, "random_fid_minus": 0.020861, "d_fid_plus": [-0.00098875, -0.0028472, 0.00076958], "d_fid_minus": [0.0075585, 0.0052606, 0.0097033]},
+   "0.3": {"pgx_fid_plus": 0.0012421, "pgx_fid_minus": 0.024888, "random_fid_plus": 0.0023437, "random_fid_minus": 0.014402, "d_fid_plus": [-0.0011016, -0.0033029, 0.0010938], "d_fid_minus": [0.010486, 0.0077998, 0.013065]},
+   "0.5": {"pgx_fid_plus": 0.006288, "pgx_fid_minus": 0.017618, "random_fid_plus": 0.0061613, "random_fid_minus": 0.0059644, "d_fid_plus": [0.0001267, -0.002676, 0.0027703], "d_fid_minus": [0.011654, 0.0088971, 0.014511]}}},
+ "torch_geometric": "2.8.1"}

@@ -8,7 +8,7 @@ trade-offs in histopathology patch classification".
 
 | Folder | What it holds |
 |---|---|
-| `notebooks/` | The five Kaggle notebooks, in run order (GPU T4 x2, Internet on) |
+| `notebooks/` | The six Kaggle notebooks, in run order (GPU T4 x2, Internet on) |
 | `scripts/` | The same code as plain Python scripts (`# %%` cells) and the templates they were built from |
 | `tests/` | Local tests for each stage and the script-to-notebook build tools |
 | `results/` | Result summaries transcribed from the Kaggle run logs |
@@ -23,6 +23,8 @@ trade-offs in histopathology patch classification".
 3. `stage3_fidelity_pcam` - PGExplainer fidelity against random edges on 1,000 test graphs.
 4. `stage4_sweeps_stats_pcam` - reduction-strength sweeps, hierarchical bootstrap, Holm adjustment.
 5. `stage5_entityset_pcam` - the entity-set model (PCA-128 node features, no edges).
+6. `stage6_gat_pcam` - the protocol repeated with a graph attention network (GAT): tuning, A8 and A-none with five seeds,
+   PGExplainer fidelity against random edges.
 
 Each later notebook takes the outputs of the earlier ones as Kaggle "Notebook output" inputs.
 
