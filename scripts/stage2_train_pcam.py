@@ -34,7 +34,7 @@ BATCH = 128
 # Training hyperparameters used by "core", "baselines" and "sweeps"; chosen from the "tune" results.
 LR = 1e-3
 WEIGHT_DECAY = 0.0                      # decoupled weight decay (AdamW)
-DROPOUT = 0.0                           # dropout before each classifier layer
+DROPOUT = 0.3                           # dropout before each classifier layer (tuning result)
 # "tune": one seed of M8 and of B_noedges for every combination below; selection on validation only.
 TUNE_CONFIGS = ["M8", "B_noedges"]
 TUNE_LR = [1e-3, 3e-4, 1e-4]
