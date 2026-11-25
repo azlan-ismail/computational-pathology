@@ -43,7 +43,7 @@ for j, k in enumerate(ORDER):
             ax.set_ylabel(lab)
         if i == 1:
             ax.set_xticks(SP)
-            ax.set_xticklabels([f"{int(100 * s)}" for s in SP], fontsize=6)
+            ax.set_xticklabels([f"{int(100 * s)}" if s != 0.2 else "" for s in SP], fontsize=6)  # 20 unlabeled: too close to 10
         ax.tick_params(axis="y", labelsize=6.5)
 fig.supxlabel("Edges kept in the explanation (%)", fontsize=8)
 handles = [plt.Line2D([], [], marker=mk, color=col, label=lab) for _, col, mk, lab in METHODS]

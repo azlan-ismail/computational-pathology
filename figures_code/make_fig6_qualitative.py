@@ -33,7 +33,7 @@ COLS = [
     ("M3: random", "M3", "kept_rand", "p_drop_rand", "p_keep_rand"),
     ("M8: gradient saliency", "M8", "kept_sal", "p_drop_sal", "p_keep_sal"),
 ]
-ROWS = [("tumour", "Tumour patch"), ("normal", "Normal patch")]
+ROWS = [("tumour", "Tumor patch"), ("normal", "Normal patch")]
 
 
 def selection(ex, model, key):
