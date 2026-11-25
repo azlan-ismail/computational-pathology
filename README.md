@@ -24,6 +24,8 @@ Code, notebooks and result summaries for
 5. `stage5_entityset_pcam` - the entity-set model (PCA-128 node features, no edges).
 6. `stage6_gat_pcam` - the protocol repeated with a graph attention network (GAT): tuning, A8 and A-none with five seeds,
    PGExplainer fidelity against random edges.
+7. `stage7_figure_pcam` - qualitative example: PGExplainer edges and random edges for M8 and M3 (seed 0) on one
+   representative tumour and one normal test patch (data for the explanation figure).
 
 Each later notebook takes the outputs of the earlier ones as Kaggle "Notebook output" inputs.
 
